@@ -1,0 +1,194 @@
+---
+title: "COD Reproducibility Report"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+#### Article ID: Tbkij
+#### Pilot: Lawrence Liu
+#### Co-pilot: Tom Hardwicke  
+#### Start date: 3/23/2017
+#### End date: 3/24/2017
+
+-------
+
+#### Methods summary: 
+The participants were tested in a quiet dark room, and they looked at a monitor for instructions while using a piece of felt in their hand to obstruct an infrared beam in front of a sensor. At the start of a trial, a participant was instructed to hold still while fixating on the center of a clock with a second hand.
+
+There were 4 conditions. In the Event (E) condition, participants listened to a tone but took no action with the cloth. In the Event-Action (EA) condition, participants were asked to lift the cloth away from the IR beam when they heard a tone. In the Action-Event (AE) and Action-Event-Action (AEA) conditions, participants were asked to move their hand at a random time of their choosing during the clock's second hand's second full rotation, after which a tone would be played. In the AEA condition, participants were instructed to lift the cloth after they heard the tone. After each trial, participants were asked to report the position of the clock's second hand when they heard the tone. After each trial, they were given feedback about whether their reported position was clockwise or counterclockwise of the actual position.
+
+Each participant practiced on all 4 conditions until their performance became stable. Then, they each underwent 3 experimental sessions of 84 trials per session. Each session consisted of four 21-trial blocks, and each block contained trials of the same condition. The condition order that each participation saw was randomized.
+
+The dependent variable is average error between the guessed second hand position and the actual second hand position on any trial for all trials within each condition.
+
+------
+
+#### Target outcomes: 
+
+* Exclude participants who did not make a hand movement between 100ms and 1000ms in the EA and AEA conditions, as well as those who made a hand movement aver the tone in the E and AE conditions. The mean ± SD of exclusions by trial type
+    + E: 2.3 ± 2.6
+    + EA: 0.8 ± 1.0
+    + AE: 1.4 ± 2.0 
+    + AEA: 4.7 ± 5.0
+* Average response time to the tone in AEA condition is 310 ± 67 ms
+* After excluding one outlier, the Pearson Product Moment correlation (r) across participants between response times in the EA condition and the AEA condition was 0.54 (p < 0.05)
+* The mean ± SD in difference scores by condition:
+    + E: 141.2 ± 45.1 ms
+    + EA: 200.5 ± 61.8 ms
+    + AE: 20.5 ± 134.3 ms
+    + AEA: 129.4 ± 116.2 ms
+* The perceived delay in the tone was larger in the EA condition (p = 0.002) and smaller in the AE condition (p = 0.001) than in the E condition.
+* There was no significant difference between the perceived delay in the AEA condition and that in the E condition (p = 0.683)
+* One-way ANOVA revealed a significant effect of conditions (F(2, 36) = 20.62, p < 0.001).
+* The standardized difference scores were larger (more positive) in the EA condition than in the AE and AEA conditions (p = 0.000 and p = 0.012 respectively).
+* The standardized difference score was smaller (less positive) in the AE condition than in the AEA condition (p = 0.003).
+
+------
+
+[The chunk below sets up some formatting options for the R Markdown document]
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
+```
+
+## Step 1: Load packages
+
+[Some useful packages are being loaded below. You can add any additional ones you might need too.]
+
+```{r}
+library(tidyverse) # for data munging
+library(knitr) # for kable table formating
+library(haven) # import and export 'SPSS', 'Stata' and 'SAS' Files
+library(readxl) # import excel files
+library(CODreports) # custom report functions
+library(matrixStats) # helps compute descriptive statistics
+```
+
+## Step 2: Load data
+
+```{r}
+perceived_times <- read_csv("data/data1.csv")
+reaction_times <- read_csv("data/data2.csv")
+```
+
+## Step 3: Tidy data
+
+```{r}
+#Long data frames
+pt_long <- perceived_times %>%
+  gather(condition, perceived_time_in_ms, E, EA, AE, AEA)
+rt_long <- reaction_times %>%
+  gather(condition, reaction_time_in_ms, E, EA, AE, AEA) %>%
+  filter(reaction_time_in_ms != "n.a.")
+
+#Clarify column names
+perceived_times_renamed <- perceived_times %>%
+  rename(E_pt = E, EA_pt = EA, AE_pt = AE, AEA_pt = AEA)
+reaction_times_renamed <- reaction_times %>%
+  rename(EA_rt = EA, AEA_rt = AEA) %>%
+  mutate(EA_rt = EA_rt * 1000, AEA_rt = AEA_rt * 1000)
+
+#Join data frames for wide form df
+df <- bind_cols(perceived_times_renamed,reaction_times_renamed %>% subset(select=c(EA_rt, AEA_rt)))
+```
+
+## Step 4: Run analysis
+
+### Pre-processing
+
+```{r}
+#Exclude the participant who misunderstood the task for all statistics involving perceived times.
+df_excl <- df %>% 
+  filter(Sbj != "FM039")
+
+#Calculate the difference scores of the subjects
+pt_diff <- perceived_times %>%
+  mutate(EA = EA - E, AE = AE - E, AEA = AEA - E)
+
+pt_diff_long <- pt_diff %>%
+  gather(condition, score_difference_with_E, EA, AE, AEA) %>%
+  subset(select=-E)
+  
+```
+
+### Descriptive statistics
+
+Average reaction time in AEA condition is 310 ± 67 ms. In order to reproduce the reported mean and SD, we needed to use the data that included the participant that misunderstood the task.
+```{r}
+mean(df$AEA_rt)
+sd(df$AEA_rt)
+```
+
+* The mean ± SD in difference scores by condition:
+    + E: 141.2 ± 45.1 ms
+    + EA: 200.5 ± 61.8 ms
+    + AE: 20.5 ± 134.3 ms
+    + AEA: 129.4 ± 116.2 ms
+    
+```{r}
+colMeans(df_excl[2:7])
+apply(df_excl[2:7], 2, sd)
+  
+```
+
+### Inferential statistics
+
+After excluding one outlier, the Pearson Product Moment correlation (r) across participants between response times in the EA condition and the AEA condition was 0.54 (p < 0.05). 
+```{r}
+# Additionally excludes an outlier on the reaction time correlations
+df_excl2 <- df_excl %>%
+  filter(Sbj != "FM016")
+cor.test(df_excl2$EA_rt, df_excl2$AEA_rt)
+
+```
+
+The perceived delay in the tone was larger in the EA condition (p = 0.002) and smaller in the AE condition (p = 0.001) than in the E condition. There was no significant difference between the perceived delay in the AEA condition and that in the E condition (p = 0.683).
+
+There is **insufficient information** to determine the test used in these planned comparisons.
+```{r}
+# t.test(as.matrix(df_excl$EA_pt), as.matrix(df_excl$E_pt))
+# t.test(as.matrix(df_excl$AE_pt), as.matrix(df_excl$E_pt))
+# t.test(as.matrix(df_excl$AEA_pt), as.matrix(df_excl$E_pt))
+```
+
+One-way ANOVA revealed a significant effect of conditions (F(2, 36) = 20.62, p < 0.001) on the standardized difference scores (where the difference scores for each participant in the E condition was subtracted from his or her difference score in the EA, AE, and AEA conditions).
+```{r}
+condition_model <- lm(score_difference_with_E ~ as.factor(condition), data=pt_diff_long)
+summary(condition_model)
+anova(condition_model)
+```
+
+The standardized difference scores were larger (more positive) in the EA condition than in the AE and AEA conditions (p = 0.000 and p = 0.012 respectively). The standardized difference score was smaller (less positive) in the AE condition than in the AEA condition (p = 0.003).
+
+There is **insufficient information** to determine the test used in these planned comparisons.
+```{r}
+# t.test(as.matrix(pt_diff$EA), as.matrix(pt_diff$AE))
+# t.test(as.matrix(pt_diff$EA), as.matrix(pt_diff$AEA))
+# t.test(as.matrix(pt_diff$AE), as.matrix(pt_diff$AEA))
+```
+
+## Step 5: Conclusion
+
+```{r}
+#F statistic in one-way ANOVA
+compareValues(reportedValue = .000, obtainedValue = .001, isP = TRUE)
+
+codReport(Report_Type = 'pilot',
+          Article_ID = 'fdsrW', 
+          Insufficient_Information_Errors = 2,
+          Decision_Errors = 0, 
+          Major_Numerical_Errors = 1, 
+          Minor_Numerical_Errors = 0)
+```
+
+The reproducibility check was a **failure**.
+
+There was insufficient information to conduct the planned comparisons between the conditions to test whether or not the perceived times significantly differed by condition, as well as whether or not the score differences with the E condition differed by condition. Furthermore, the one-way ANOVA produced different F-statistics and p-value (and did not even match the number of degrees of freedom).
+
+In addition, there appears to be numerous arbitrary decisions about when to use exclude participants. The authors simply say that they exclude "outliers" without describing how the outlier was determined and why they were excluded in the particular tests that they were excluded from. Specifically, the means of reaction time in the AEA condition were calculated with no exclusions. The mean and SD of the scores were calculated with exclusion on Subject FM039. Finally, the correlation between the EA and AEA reaction times were calculated with exclusion on Subject FM016.
+
+```{r session_info, include=TRUE, echo=TRUE, results='markup'}
+devtools::session_info()
+```
