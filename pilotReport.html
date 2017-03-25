@@ -407,11 +407,13 @@ summary(condition_model)</code></pre>
 </div>
 <div id="step-5-conclusion" class="section level2">
 <h2>Step 5: Conclusion</h2>
+<div id="the-reproducibility-check-was-a-failure." class="section level3">
+<h3>The reproducibility check was a <strong>failure</strong>.</h3>
 <pre class="r"><code>#F statistic in one-way ANOVA
 compareValues(reportedValue = .000, obtainedValue = .001, isP = TRUE)</code></pre>
 <pre><code>## [1] &quot;MAJOR NUMERICAL ERROR. The reported value (0) and the obtained value (0.001) differed by Inf%&quot;</code></pre>
 <pre class="r"><code>codReport(Report_Type = 'pilot',
-          Article_ID = 'fdsrW', 
+          Article_ID = 'Tbkij', 
           Insufficient_Information_Errors = 2,
           Decision_Errors = 0, 
           Major_Numerical_Errors = 1, 
@@ -436,7 +438,6 @@ compareValues(reportedValue = .000, obtainedValue = .001, isP = TRUE)</code></pr
 </tr>
 </tbody>
 </table>
-<p>The reproducibility check was a <strong>failure</strong>.</p>
 <p>There was insufficient information to conduct the planned comparisons between the conditions to test whether or not the perceived times significantly differed by condition, as well as whether or not the score differences with the E condition differed by condition. Furthermore, the one-way ANOVA produced different F-statistics and p-value (and did not even match the number of degrees of freedom).</p>
 <p>In addition, there appears to be numerous arbitrary decisions about when to use exclude participants. The authors simply say that they exclude “outliers” without describing how the outlier was determined and why they were excluded in the particular tests that they were excluded from. Specifically, the means of reaction time in the AEA condition were calculated with no exclusions. The mean and SD of the scores were calculated with exclusion on Subject FM039. Finally, the correlation between the EA and AEA reaction times were calculated with exclusion on Subject FM016.</p>
 <pre class="r"><code>devtools::session_info()</code></pre>
@@ -553,6 +554,7 @@ compareValues(reportedValue = .000, obtainedValue = .001, isP = TRUE)</code></pr
 ##  CRAN (R 3.3.1)                                      
 ##  CRAN (R 3.3.2)                                      
 ##  CRAN (R 3.3.2)</code></pre>
+</div>
 </div>
 
 

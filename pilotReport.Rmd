@@ -171,19 +171,19 @@ There is **insufficient information** to determine the test used in these planne
 
 ## Step 5: Conclusion
 
+###The reproducibility check was a **failure**.
+
 ```{r}
 #F statistic in one-way ANOVA
 compareValues(reportedValue = .000, obtainedValue = .001, isP = TRUE)
 
 codReport(Report_Type = 'pilot',
-          Article_ID = 'fdsrW', 
+          Article_ID = 'Tbkij', 
           Insufficient_Information_Errors = 2,
           Decision_Errors = 0, 
           Major_Numerical_Errors = 1, 
           Minor_Numerical_Errors = 0)
 ```
-
-The reproducibility check was a **failure**.
 
 There was insufficient information to conduct the planned comparisons between the conditions to test whether or not the perceived times significantly differed by condition, as well as whether or not the score differences with the E condition differed by condition. Furthermore, the one-way ANOVA produced different F-statistics and p-value (and did not even match the number of degrees of freedom).
 
