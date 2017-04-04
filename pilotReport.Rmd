@@ -8,7 +8,6 @@ output:
 
 #### Article ID: Tbkij
 #### Pilot: Lawrence Liu
-#### Co-pilot: Tom Hardwicke  
 #### Start date: 3/23/2017
 #### End date: 3/24/2017
 
@@ -27,18 +26,18 @@ The dependent variable is average error between the guessed second hand position
 
 #### Target outcomes: 
 
-* Exclude participants who did not make a hand movement between 100ms and 1000ms in the EA and AEA conditions, as well as those who made a hand movement aver the tone in the E and AE conditions. The mean ± SD of exclusions by trial type
-    + E: 2.3 ± 2.6
-    + EA: 0.8 ± 1.0
-    + AE: 1.4 ± 2.0 
-    + AEA: 4.7 ± 5.0
-* Average response time to the tone in AEA condition is 310 ± 67 ms
+* Exclude participants who did not make a hand movement between 100ms and 1000ms in the EA and AEA conditions, as well as those who made a hand movement aver the tone in the E and AE conditions. The mean Â± SD of exclusions by trial type
+    + E: 2.3 Â± 2.6
+    + EA: 0.8 Â± 1.0
+    + AE: 1.4 Â± 2.0 
+    + AEA: 4.7 Â± 5.0
+* Average response time to the tone in AEA condition is 310 Â± 67 ms
 * After excluding one outlier, the Pearson Product Moment correlation (r) across participants between response times in the EA condition and the AEA condition was 0.54 (p < 0.05)
-* The mean ± SD in difference scores by condition:
-    + E: 141.2 ± 45.1 ms
-    + EA: 200.5 ± 61.8 ms
-    + AE: 20.5 ± 134.3 ms
-    + AEA: 129.4 ± 116.2 ms
+* The mean Â± SD in difference scores by condition:
+    + E: 141.2 Â± 45.1 ms
+    + EA: 200.5 Â± 61.8 ms
+    + AE: 20.5 Â± 134.3 ms
+    + AEA: 129.4 Â± 116.2 ms
 * The perceived delay in the tone was larger in the EA condition (p = 0.002) and smaller in the AE condition (p = 0.001) than in the E condition.
 * There was no significant difference between the perceived delay in the AEA condition and that in the E condition (p = 0.683)
 * One-way ANOVA revealed a significant effect of conditions (F(2, 36) = 20.62, p < 0.001).
@@ -63,7 +62,7 @@ library(knitr) # for kable table formating
 library(haven) # import and export 'SPSS', 'Stata' and 'SAS' Files
 library(readxl) # import excel files
 library(CODreports) # custom report functions
-library(matrixStats) # helps compute descriptive statistics
+#library(matrixStats) # helps compute descriptive statistics
 ```
 
 ## Step 2: Load data
@@ -115,17 +114,17 @@ pt_diff_long <- pt_diff %>%
 
 ### Descriptive statistics
 
-Average reaction time in AEA condition is 310 ± 67 ms. In order to reproduce the reported mean and SD, we needed to use the data that included the participant that misunderstood the task.
+Average reaction time in AEA condition is 310 Â± 67 ms. In order to reproduce the reported mean and SD, we needed to use the data that included the participant that misunderstood the task.
 ```{r}
 mean(df$AEA_rt)
 sd(df$AEA_rt)
 ```
 
-* The mean ± SD in difference scores by condition:
-    + E: 141.2 ± 45.1 ms
-    + EA: 200.5 ± 61.8 ms
-    + AE: 20.5 ± 134.3 ms
-    + AEA: 129.4 ± 116.2 ms
+* The mean Â± SD in difference scores by condition:
+    + E: 141.2 Â± 45.1 ms
+    + EA: 200.5 Â± 61.8 ms
+    + AE: 20.5 Â± 134.3 ms
+    + AEA: 129.4 Â± 116.2 ms
     
 ```{r}
 colMeans(df_excl[2:7])

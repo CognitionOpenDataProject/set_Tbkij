@@ -224,11 +224,14 @@ div.tocify {
 <div id="pilot-lawrence-liu" class="section level4">
 <h4>Pilot: Lawrence Liu</h4>
 </div>
+<div id="co-pilot-tom-hardwicke" class="section level4">
+<h4>Co-pilot: Tom Hardwicke</h4>
+</div>
 <div id="start-date-3232017" class="section level4">
 <h4>Start date: 3/23/2017</h4>
 </div>
-<div id="end-date-3242017" class="section level4">
-<h4>End date: 3/24/2017</h4>
+<div id="end-date" class="section level4">
+<h4>End date:</h4>
 <hr />
 </div>
 <div id="methods-summary" class="section level4">
@@ -241,41 +244,22 @@ div.tocify {
 </div>
 <div id="target-outcomes" class="section level4">
 <h4>Target outcomes:</h4>
-<ul>
-<li>Exclude participants who did not make a hand movement between 100ms and 1000ms in the EA and AEA conditions, as well as those who made a hand movement aver the tone in the E and AE conditions. The mean ± SD of exclusions by trial type
-<ul>
-<li>E: 2.3 ± 2.6</li>
-<li>EA: 0.8 ± 1.0</li>
-<li>AE: 1.4 ± 2.0</li>
-<li>AEA: 4.7 ± 5.0</li>
-</ul></li>
-<li>Average response time to the tone in AEA condition is 310 ± 67 ms</li>
-<li>After excluding one outlier, the Pearson Product Moment correlation (r) across participants between response times in the EA condition and the AEA condition was 0.54 (p &lt; 0.05)</li>
-<li>The mean ± SD in difference scores by condition:
-<ul>
-<li>E: 141.2 ± 45.1 ms</li>
-<li>EA: 200.5 ± 61.8 ms</li>
-<li>AE: 20.5 ± 134.3 ms</li>
-<li>AEA: 129.4 ± 116.2 ms</li>
-</ul></li>
-<li>The perceived delay in the tone was larger in the EA condition (p = 0.002) and smaller in the AE condition (p = 0.001) than in the E condition.</li>
-<li>There was no significant difference between the perceived delay in the AEA condition and that in the E condition (p = 0.683)</li>
-<li>One-way ANOVA revealed a significant effect of conditions (F(2, 36) = 20.62, p &lt; 0.001).</li>
-<li>The standardized difference scores were larger (more positive) in the EA condition than in the AE and AEA conditions (p = 0.000 and p = 0.012 respectively).</li>
-<li>The standardized difference score was smaller (less positive) in the AE condition than in the AEA condition (p = 0.003).</li>
-</ul>
+<blockquote>
+<p>All the participants initiated their actions during the second rotation of the Libet clock in the AE and AEA conditions. In addition, the response times for the second movement in the AEA condition suggest that participants had followed the instruction to respond to the tone rather than simply making two movements, one after the other without reference to the tone. [If the time between the tone and the second movement was 100 ms or less, then that trial was excluded from analysis.] On average, the response time to the tone was 310 ± 67 ms, a value that is consistent with reacting to the tone rather than simply making a ‘double’ movement. This means that the average interval between the two movements was more than 500 ms, given that the tone always occurred 250 ms after the first movement – an inter-movement interval that suggests that the movements were independent rather than linked. Moreover, after excluding one outlier, the Pearson Product Moment correlation (r) across participants between response times in the EA condition and the AEA condition was 0.54 (p &lt; 0.05), again suggesting that the second action in AEA condition was a reaction to the tone as was the action in EA condition. Fig. 2 depicts the mean difference scores (perceived minus real stimulus onsets) for all participants across conditions. The data from one participant who did not understand the task was excluded. The mean ± SD difference scores for the E, EA, AE and AEA conditions were 141.2 ± 45.1 ms, 200.5 ± 61.8 ms, 20.5 ± 134.3 ms, and 129.4 ± 116.2 ms respectively. The perceived delay in the tone was larger in the EA condition (p = 0.002) and smaller in the AE condition (p = 0.001) than in the E condition. There was no significant difference between the perceived delay in the AEA condition and that in the E condition (p = 0.683).</p>
+</blockquote>
+<blockquote>
+<p>A one-way ANOVA revealed a significant effect of conditions (F(2, 36) = 20.62, p &lt; 0.001) on the standardized difference scores (where the difference scores for each participant in the E condition was subtracted from his or her difference score in the EA, AE, and AEA conditions). The post hoc tests revealed that the standardized difference scores were larger (more positive) in the EA condition than in the AE and AEA conditions (p = 0.000 and p = 0.012 respectively). The standardized difference score was smaller (less positive) in the AE condition than in the AEA condition (p = 0.003). In summary, temporal binding occurred both when an action triggered an event and when an event triggered an action. However, the binding (as indicated by a smaller perceived delay) was decreased when an action followed an action – event sequence.</p>
+</blockquote>
 <hr />
-<p>[The chunk below sets up some formatting options for the R Markdown document]</p>
 </div>
 <div id="step-1-load-packages" class="section level2">
 <h2>Step 1: Load packages</h2>
-<p>[Some useful packages are being loaded below. You can add any additional ones you might need too.]</p>
+<p>Some useful packages are being loaded below.</p>
 <pre class="r"><code>library(tidyverse) # for data munging
 library(knitr) # for kable table formating
 library(haven) # import and export 'SPSS', 'Stata' and 'SAS' Files
 library(readxl) # import excel files
-library(CODreports) # custom report functions
-#library(matrixStats) # helps compute descriptive statistics</code></pre>
+library(CODreports) # custom report functions</code></pre>
 </div>
 <div id="step-2-load-data" class="section level2">
 <h2>Step 2: Load data</h2>
@@ -284,6 +268,7 @@ reaction_times &lt;- read_csv(&quot;data/data2.csv&quot;)</code></pre>
 </div>
 <div id="step-3-tidy-data" class="section level2">
 <h2>Step 3: Tidy data</h2>
+<p>Organise the data in ‘Tidy’ format:</p>
 <pre class="r"><code>#Long data frames
 pt_long &lt;- perceived_times %&gt;%
   gather(condition, perceived_time_in_ms, E, EA, AE, AEA)
@@ -303,117 +288,33 @@ df &lt;- bind_cols(perceived_times_renamed,reaction_times_renamed %&gt;% subset(
 </div>
 <div id="step-4-run-analysis" class="section level2">
 <h2>Step 4: Run analysis</h2>
-<div id="pre-processing" class="section level3">
-<h3>Pre-processing</h3>
-<pre class="r"><code>#Exclude the participant who misunderstood the task for all statistics involving perceived times.
-df_excl &lt;- df %&gt;% 
-  filter(Sbj != &quot;FM039&quot;)
-
-#Calculate the difference scores of the subjects
-pt_diff &lt;- perceived_times %&gt;%
-  mutate(EA = EA - E, AE = AE - E, AEA = AEA - E)
-
-pt_diff_long &lt;- pt_diff %&gt;%
-  gather(condition, score_difference_with_E, EA, AE, AEA) %&gt;%
-  subset(select=-E)</code></pre>
-</div>
 <div id="descriptive-statistics" class="section level3">
 <h3>Descriptive statistics</h3>
-<p>Average reaction time in AEA condition is 310 ± 67 ms. In order to reproduce the reported mean and SD, we needed to use the data that included the participant that misunderstood the task.</p>
-<pre class="r"><code>mean(df$AEA_rt)</code></pre>
-<pre><code>## [1] 310.2245</code></pre>
-<pre class="r"><code>sd(df$AEA_rt)</code></pre>
-<pre><code>## [1] 67.09632</code></pre>
-<ul>
-<li>The mean ± SD in difference scores by condition:
-<ul>
-<li>E: 141.2 ± 45.1 ms</li>
-<li>EA: 200.5 ± 61.8 ms</li>
-<li>AE: 20.5 ± 134.3 ms</li>
-<li>AEA: 129.4 ± 116.2 ms</li>
-</ul></li>
-</ul>
-<pre class="r"><code>colMeans(df_excl[2:7])</code></pre>
-<pre><code>##      E_pt     EA_pt     AE_pt    AEA_pt     EA_rt    AEA_rt 
-## 141.22966 200.52754  20.46303 129.41499 363.88947 308.93959</code></pre>
-<pre class="r"><code>apply(df_excl[2:7], 2, sd)</code></pre>
-<pre><code>##      E_pt     EA_pt     AE_pt    AEA_pt     EA_rt    AEA_rt 
-##  45.11557  61.81534 134.27415 116.16599  40.25370  68.68165</code></pre>
+<p>Try to reproduce the following target outcomes:</p>
+<blockquote>
+<p>On average, the response time to the tone was 310 ± 67 ms, a value that is consistent with reacting to the tone rather than simply making a ‘double’ movement.</p>
+</blockquote>
+<pre class="r"><code>compareValues(reportedValue = 310, obtainedValue = round(mean(df$AEA_rt),0))</code></pre>
+<pre><code>## [1] &quot;MATCH. The reported value (310) and the obtained value (310) differed by 0%&quot;</code></pre>
+<pre class="r"><code>compareValues(reportedValue = 67, obtainedValue = round(sd(df$AEA_rt),0))</code></pre>
+<pre><code>## [1] &quot;MATCH. The reported value (67) and the obtained value (67) differed by 0%&quot;</code></pre>
 </div>
 <div id="inferential-statistics" class="section level3">
 <h3>Inferential statistics</h3>
-<p>After excluding one outlier, the Pearson Product Moment correlation (r) across participants between response times in the EA condition and the AEA condition was 0.54 (p &lt; 0.05).</p>
-<pre class="r"><code># Additionally excludes an outlier on the reaction time correlations
-df_excl2 &lt;- df_excl %&gt;%
-  filter(Sbj != &quot;FM016&quot;)
-cor.test(df_excl2$EA_rt, df_excl2$AEA_rt)</code></pre>
-<pre><code>## 
-##  Pearson's product-moment correlation
-## 
-## data:  df_excl2$EA_rt and df_excl2$AEA_rt
-## t = 2.562, df = 16, p-value = 0.02089
-## alternative hypothesis: true correlation is not equal to 0
-## 95 percent confidence interval:
-##  0.09687056 0.80381352
-## sample estimates:
-##       cor 
-## 0.5393481</code></pre>
-<p>The perceived delay in the tone was larger in the EA condition (p = 0.002) and smaller in the AE condition (p = 0.001) than in the E condition. There was no significant difference between the perceived delay in the AEA condition and that in the E condition (p = 0.683).</p>
-<p>There is <strong>insufficient information</strong> to determine the test used in these planned comparisons.</p>
-<pre class="r"><code># t.test(as.matrix(df_excl$EA_pt), as.matrix(df_excl$E_pt))
-# t.test(as.matrix(df_excl$AE_pt), as.matrix(df_excl$E_pt))
-# t.test(as.matrix(df_excl$AEA_pt), as.matrix(df_excl$E_pt))</code></pre>
-<p>One-way ANOVA revealed a significant effect of conditions (F(2, 36) = 20.62, p &lt; 0.001) on the standardized difference scores (where the difference scores for each participant in the E condition was subtracted from his or her difference score in the EA, AE, and AEA conditions).</p>
-<pre class="r"><code>condition_model &lt;- lm(score_difference_with_E ~ as.factor(condition), data=pt_diff_long)
-summary(condition_model)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = score_difference_with_E ~ as.factor(condition), 
-##     data = pt_diff_long)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -505.02  -33.83   29.56   78.56  282.99 
-## 
-## Coefficients:
-##                         Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)              -137.26      31.02  -4.425  4.4e-05 ***
-## as.factor(condition)AEA   112.64      43.87   2.568 0.012878 *  
-## as.factor(condition)EA    169.98      43.87   3.875 0.000278 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## Residual standard error: 138.7 on 57 degrees of freedom
-## Multiple R-squared:  0.2143, Adjusted R-squared:  0.1867 
-## F-statistic: 7.772 on 2 and 57 DF,  p-value: 0.001036</code></pre>
-<pre class="r"><code>anova(condition_model)</code></pre>
-<pre><code>## Analysis of Variance Table
-## 
-## Response: score_difference_with_E
-##                      Df  Sum Sq Mean Sq F value   Pr(&gt;F)   
-## as.factor(condition)  2  299120  149560  7.7723 0.001036 **
-## Residuals            57 1096831   19243                    
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
-<p>The standardized difference scores were larger (more positive) in the EA condition than in the AE and AEA conditions (p = 0.000 and p = 0.012 respectively). The standardized difference score was smaller (less positive) in the AE condition than in the AEA condition (p = 0.003).</p>
-<p>There is <strong>insufficient information</strong> to determine the test used in these planned comparisons.</p>
-<pre class="r"><code># t.test(as.matrix(pt_diff$EA), as.matrix(pt_diff$AE))
-# t.test(as.matrix(pt_diff$EA), as.matrix(pt_diff$AEA))
-# t.test(as.matrix(pt_diff$AE), as.matrix(pt_diff$AEA))</code></pre>
+<p>Now we to reproduce the following target outcomes:</p>
+<blockquote>
+<p>after excluding one outlier, the Pearson Product Moment correlation (r) across participants between response times in the EA condition and the AEA condition was 0.54 (p &lt; 0.05), again suggesting that the second action in AEA condition was a reaction to the tone as was the action in EA condition. Fig. 2 depicts the mean difference scores (perceived minus real stimulus onsets) for all participants across conditions. The data from one participant who did not understand the task was excluded. The mean ± SD difference scores for the E, EA, AE and AEA conditions were 141.2 ± 45.1 ms, 200.5 ± 61.8 ms, 20.5 ± 134.3 ms, and 129.4 ± 116.2 ms respectively. The perceived delay in the tone was larger in the EA condition (p = 0.002) and smaller in the AE condition (p = 0.001) than in the E condition. There was no significant difference between the perceived delay in the AEA condition and that in the E condition (p = 0.683).</p>
+</blockquote>
+<p>INSUFFICIENT INFORMATION ERROR We do not know the identity of the outlier, so cannot proceed with the analysis.</p>
 </div>
 </div>
 <div id="step-5-conclusion" class="section level2">
 <h2>Step 5: Conclusion</h2>
-<div id="the-reproducibility-check-was-a-failure." class="section level3">
-<h3>The reproducibility check was a <strong>failure</strong>.</h3>
-<pre class="r"><code>#F statistic in one-way ANOVA
-compareValues(reportedValue = .000, obtainedValue = .001, isP = TRUE)</code></pre>
-<pre><code>## [1] &quot;MAJOR NUMERICAL ERROR. The reported value (0) and the obtained value (0.001) differed by Inf%&quot;</code></pre>
-<pre class="r"><code>codReport(Report_Type = 'pilot',
+<pre class="r"><code>codReport(Report_Type = 'joint',
           Article_ID = 'Tbkij', 
-          Insufficient_Information_Errors = 2,
+          Insufficient_Information_Errors = 1,
           Decision_Errors = 0, 
-          Major_Numerical_Errors = 1, 
+          Major_Numerical_Errors = 0, 
           Minor_Numerical_Errors = 0)</code></pre>
 <table>
 <thead>
@@ -427,16 +328,15 @@ compareValues(reportedValue = .000, obtainedValue = .001, isP = TRUE)</code></pr
 </thead>
 <tbody>
 <tr class="odd">
-<td align="right">2</td>
-<td align="right">0</td>
 <td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
 <td align="right">0</td>
 <td align="left">Failure</td>
 </tr>
 </tbody>
 </table>
-<p>There was insufficient information to conduct the planned comparisons between the conditions to test whether or not the perceived times significantly differed by condition, as well as whether or not the score differences with the E condition differed by condition. Furthermore, the one-way ANOVA produced different F-statistics and p-value (and did not even match the number of degrees of freedom).</p>
-<p>In addition, there appears to be numerous arbitrary decisions about when to use exclude participants. The authors simply say that they exclude “outliers” without describing how the outlier was determined and why they were excluded in the particular tests that they were excluded from. Specifically, the means of reaction time in the AEA condition were calculated with no exclusions. The mean and SD of the scores were calculated with exclusion on Subject FM039. Finally, the correlation between the EA and AEA reaction times were calculated with exclusion on Subject FM016.</p>
+<p>There was insufficient information to continue with the analysis. An outlier was excluded but not explicitly identified, so we do not know which data to exlude from our re-analysis.</p>
 <pre class="r"><code>devtools::session_info()</code></pre>
 <pre><code>##  setting  value                       
 ##  version  R version 3.3.2 (2016-10-31)
@@ -445,7 +345,7 @@ compareValues(reportedValue = .000, obtainedValue = .001, isP = TRUE)</code></pr
 ##  language (EN)                        
 ##  collate  en_US.UTF-8                 
 ##  tz       America/Los_Angeles         
-##  date     2017-03-27                  
+##  date     2017-03-30                  
 ## 
 ##  package    * version date      
 ##  assertthat   0.1     2013-12-06
@@ -549,7 +449,6 @@ compareValues(reportedValue = .000, obtainedValue = .001, isP = TRUE)</code></pr
 ##  CRAN (R 3.3.0)                                      
 ##  cran (@1.1.1)                                       
 ##  CRAN (R 3.3.2)</code></pre>
-</div>
 </div>
 
 

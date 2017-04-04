@@ -1,0 +1,120 @@
+---
+title: "COD Reproducibility Report"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+#### Article ID: Tbkij
+#### Pilot: Lawrence Liu
+#### Co-pilot: Tom Hardwicke
+#### Start date: 3/23/2017
+#### End date: 
+
+-------
+
+#### Methods summary: 
+The participants were tested in a quiet dark room, and they looked at a monitor for instructions while using a piece of felt in their hand to obstruct an infrared beam in front of a sensor. At the start of a trial, a participant was instructed to hold still while fixating on the center of a clock with a second hand.
+
+There were 4 conditions. In the Event (E) condition, participants listened to a tone but took no action with the cloth. In the Event-Action (EA) condition, participants were asked to lift the cloth away from the IR beam when they heard a tone. In the Action-Event (AE) and Action-Event-Action (AEA) conditions, participants were asked to move their hand at a random time of their choosing during the clock's second hand's second full rotation, after which a tone would be played. In the AEA condition, participants were instructed to lift the cloth after they heard the tone. After each trial, participants were asked to report the position of the clock's second hand when they heard the tone. After each trial, they were given feedback about whether their reported position was clockwise or counterclockwise of the actual position.
+
+Each participant practiced on all 4 conditions until their performance became stable. Then, they each underwent 3 experimental sessions of 84 trials per session. Each session consisted of four 21-trial blocks, and each block contained trials of the same condition. The condition order that each participation saw was randomized.
+
+The dependent variable is average error between the guessed second hand position and the actual second hand position on any trial for all trials within each condition.
+
+------
+
+#### Target outcomes: 
+
+> All the participants initiated their actions during the second rotation of the Libet clock in the AE and AEA conditions. In addition, the response times for the second movement in the AEA condition suggest that participants had followed the instruction to respond to the tone rather than simply making two movements, one after the other without reference to the tone. [If the time between the tone and the second movement was 100 ms or less, then that trial was excluded from analysis.] On average, the response time to the tone was 310 ± 67 ms, a value that is consistent with reacting to the tone rather than simply making a ‘double’ movement. This means that the average interval between the two movements was more than 500 ms, given that the tone always occurred 250 ms after the first movement – an inter-movement interval that suggests that the movements were independent rather than linked. Moreover, after excluding one outlier, the Pearson Product Moment correlation (r) across participants between response times in the EA condition and the AEA condition was 0.54 (p < 0.05), again suggesting that the second action in AEA condition was a reaction to the tone as was the action in EA condition. Fig. 2 depicts the mean difference scores (perceived minus real stimulus onsets) for all participants across conditions. The data from one participant who did not understand the task was excluded. The mean ± SD difference scores for the E, EA, AE and AEA conditions were 141.2 ± 45.1 ms, 200.5 ± 61.8 ms, 20.5 ± 134.3 ms, and 129.4 ± 116.2 ms respectively. The perceived delay in the tone was larger in the EA condition (p = 0.002) and smaller in the AE condition (p = 0.001) than in the E condition. There was no significant difference between the perceived delay in the AEA condition and that in the E condition (p = 0.683).
+
+> A one-way ANOVA revealed a significant effect of conditions (F(2, 36) = 20.62, p < 0.001) on the standardized difference scores (where the difference scores for each participant in the E condition was subtracted from his or her difference score in the EA, AE, and AEA conditions). The post hoc tests revealed that the standardized difference scores were larger (more positive) in the EA condition than in the AE and AEA conditions (p = 0.000 and p = 0.012 respectively). The standardized difference score was smaller (less positive) in the AE condition than in the AEA condition (p = 0.003). In summary, temporal binding occurred both when an action triggered an event and when an event triggered an action. However, the binding (as indicated by a smaller perceived delay) was decreased when an action followed an action – event sequence.
+
+------
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
+```
+
+## Step 1: Load packages
+
+Some useful packages are being loaded below.
+
+```{r}
+library(tidyverse) # for data munging
+library(knitr) # for kable table formating
+library(haven) # import and export 'SPSS', 'Stata' and 'SAS' Files
+library(readxl) # import excel files
+library(CODreports) # custom report functions
+```
+
+## Step 2: Load data
+
+```{r}
+perceived_times <- read_csv("data/data1.csv")
+reaction_times <- read_csv("data/data2.csv")
+```
+
+## Step 3: Tidy data
+
+Organise the data in 'Tidy' format:
+
+```{r}
+#Long data frames
+pt_long <- perceived_times %>%
+  gather(condition, perceived_time_in_ms, E, EA, AE, AEA)
+rt_long <- reaction_times %>%
+  gather(condition, reaction_time_in_ms, E, EA, AE, AEA) %>%
+  filter(reaction_time_in_ms != "n.a.")
+
+#Clarify column names
+perceived_times_renamed <- perceived_times %>%
+  rename(E_pt = E, EA_pt = EA, AE_pt = AE, AEA_pt = AEA)
+reaction_times_renamed <- reaction_times %>%
+  rename(EA_rt = EA, AEA_rt = AEA) %>%
+  mutate(EA_rt = EA_rt * 1000, AEA_rt = AEA_rt * 1000)
+
+#Join data frames for wide form df
+df <- bind_cols(perceived_times_renamed,reaction_times_renamed %>% subset(select=c(EA_rt, AEA_rt)))
+```
+
+## Step 4: Run analysis
+
+### Descriptive statistics
+
+Try to reproduce the following target outcomes:
+
+> On average, the response time to the tone was 310 ± 67 ms, a value that is consistent with reacting to the tone rather than simply making a ‘double’ movement.
+
+```{r}
+compareValues(reportedValue = 310, obtainedValue = round(mean(df$AEA_rt),0))
+compareValues(reportedValue = 67, obtainedValue = round(sd(df$AEA_rt),0))
+```
+
+### Inferential statistics
+
+Now we to reproduce the following target outcomes:
+
+> after excluding one outlier, the Pearson Product Moment correlation (r) across participants between response times in the EA condition and the AEA condition was 0.54 (p < 0.05), again suggesting that the second action in AEA condition was a reaction to the tone as was the action in EA condition. Fig. 2 depicts the mean difference scores (perceived minus real stimulus onsets) for all participants across conditions. The data from one participant who did not understand the task was excluded. The mean ± SD difference scores for the E, EA, AE and AEA conditions were 141.2 ± 45.1 ms, 200.5 ± 61.8 ms, 20.5 ± 134.3 ms, and 129.4 ± 116.2 ms respectively. The perceived delay in the tone was larger in the EA condition (p = 0.002) and smaller in the AE condition (p = 0.001) than in the E condition. There was no significant difference between the perceived delay in the AEA condition and that in the E condition (p = 0.683).
+
+INSUFFICIENT INFORMATION ERROR
+We do not know the identity of the outlier, so cannot proceed with the analysis.
+
+## Step 5: Conclusion
+
+
+```{r}
+codReport(Report_Type = 'joint',
+          Article_ID = 'Tbkij', 
+          Insufficient_Information_Errors = 1,
+          Decision_Errors = 0, 
+          Major_Numerical_Errors = 0, 
+          Minor_Numerical_Errors = 0)
+```
+
+There was insufficient information to continue with the analysis. An outlier was excluded but not explicitly identified, so we do not know which data to exlude from our re-analysis.
+
+```{r session_info, include=TRUE, echo=TRUE, results='markup'}
+devtools::session_info()
+```
