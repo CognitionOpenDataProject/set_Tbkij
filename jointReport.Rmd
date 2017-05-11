@@ -10,7 +10,7 @@ output:
 #### Pilot: Lawrence Liu
 #### Co-pilot: Tom Hardwicke
 #### Start date: 3/23/2017
-#### End date: 
+#### End date: 05/11/2017
 
 -------
 
@@ -46,7 +46,9 @@ library(tidyverse) # for data munging
 library(knitr) # for kable table formating
 library(haven) # import and export 'SPSS', 'Stata' and 'SAS' Files
 library(readxl) # import excel files
+library(broom) # for neat model output
 library(CODreports) # custom report functions
+pull <- function(x,y) {x[,if(is.name(substitute(y))) deparse(substitute(y)) else y, drop = FALSE][[1]]} # custom function to extract data
 ```
 
 ## Step 2: Load data
@@ -69,14 +71,14 @@ rt_long <- reaction_times %>%
   filter(reaction_time_in_ms != "n.a.")
 
 #Clarify column names
-perceived_times_renamed <- perceived_times %>%
+p_times <- perceived_times %>%
   rename(E_pt = E, EA_pt = EA, AE_pt = AE, AEA_pt = AEA)
-reaction_times_renamed <- reaction_times %>%
+r_times <- reaction_times %>%
   rename(EA_rt = EA, AEA_rt = AEA) %>%
   mutate(EA_rt = EA_rt * 1000, AEA_rt = AEA_rt * 1000)
 
 #Join data frames for wide form df
-df <- bind_cols(perceived_times_renamed,reaction_times_renamed %>% subset(select=c(EA_rt, AEA_rt)))
+df <- bind_cols(p_times,r_times %>% subset(select=c(EA_rt, AEA_rt)))
 ```
 
 ## Step 4: Run analysis
@@ -88,32 +90,143 @@ Try to reproduce the following target outcomes:
 > On average, the response time to the tone was 310 ± 67 ms, a value that is consistent with reacting to the tone rather than simply making a ‘double’ movement.
 
 ```{r}
-compareValues(reportedValue = 310, obtainedValue = round(mean(df$AEA_rt),0))
-compareValues(reportedValue = 67, obtainedValue = round(sd(df$AEA_rt),0))
+compareValues(reportedValue = 310, obtainedValue = mean(df$AEA_rt))
+compareValues(reportedValue = 67, obtainedValue = sd(df$AEA_rt))
 ```
 
 ### Inferential statistics
 
-Now we to reproduce the following target outcomes:
+Now we attempt to reproduce the following target outcomes:
 
-> after excluding one outlier, the Pearson Product Moment correlation (r) across participants between response times in the EA condition and the AEA condition was 0.54 (p < 0.05), again suggesting that the second action in AEA condition was a reaction to the tone as was the action in EA condition. Fig. 2 depicts the mean difference scores (perceived minus real stimulus onsets) for all participants across conditions. The data from one participant who did not understand the task was excluded. The mean ± SD difference scores for the E, EA, AE and AEA conditions were 141.2 ± 45.1 ms, 200.5 ± 61.8 ms, 20.5 ± 134.3 ms, and 129.4 ± 116.2 ms respectively. The perceived delay in the tone was larger in the EA condition (p = 0.002) and smaller in the AE condition (p = 0.001) than in the E condition. There was no significant difference between the perceived delay in the AEA condition and that in the E condition (p = 0.683).
+> after excluding one outlier, the Pearson Product Moment correlation (r) across participants between response times in the EA condition and the AEA condition was 0.54 (p < 0.05), again suggesting that the second action in AEA condition was a reaction to the tone as was the action in EA condition. 
 
-INSUFFICIENT INFORMATION ERROR
-We do not know the identity of the outlier, so cannot proceed with the analysis.
+NB we initially ran into problems here as we did not know the identity of the outlier, and could not proceed with this aspect of the analysis. However, we were able to contact the original authors who identified the participant for us as "FM016"
+
+```{r}
+df_drop <- df %>% filter(Sbj != "FM016") # remove participant id FM016
+cor.test(df_drop$EA_rt, df_drop$AEA_rt)
+```
+
+The values match.
+
+Let's now try and reproduce the following outcomes:
+
+> Fig. 2 depicts the mean difference scores (perceived minus real stimulus onsets) for all participants across conditions. The data from one participant who did not understand the task was excluded. 
+
+Initially we did not know the identity of this participant and could not complete the analysis. As a result we coded an insufficient information error. However, contact with the original authors revealed that this participant was "FM039". Here we remove that participant before proceeding:
+
+```{r}
+df_drop2 <- df %>%
+  filter(Sbj != "FM039")
+```
+
+We should now have 19 participants:
+
+```{r}
+nrow(df_drop2)
+```
+
+Let's try and reproduce these values:
+
+> The mean ± SD difference scores for the E, EA, AE and AEA conditions were 141.2 ± 45.1 ms, 200.5 ± 61.8 ms, 20.5 ± 134.3 ms, and 129.4 ± 116.2 ms respectively. 
+
+```{r}
+sumTab <- df_drop2 %>% 
+  select(-EA_rt,-AEA_rt) %>% 
+  gather(condition, pt, E_pt:AEA_pt, factor_key=TRUE) %>% 
+  group_by(condition) %>%
+  summarise(mean(pt), sd(pt), n())
+sumTab
+```
+
+The values appear to match. Let's double check:
+
+```{r}
+m1 <- sumTab %>% filter(condition == "E_pt") %>% pull(`mean(pt)`)
+compareValues(reportedValue = 141.2, obtainedValue = m1)
+sd1 <- sumTab %>% filter(condition == "E_pt") %>% pull(`sd(pt)`)
+compareValues(reportedValue = 45.1, obtainedValue = sd1)
+
+m2 <- sumTab %>% filter(condition == "EA_pt") %>% pull(`mean(pt)`)
+compareValues(reportedValue = 200.5, obtainedValue = m2)
+sd2 <- sumTab %>% filter(condition == "EA_pt") %>% pull(`sd(pt)`)
+compareValues(reportedValue = 61.8, obtainedValue = sd2)
+
+m3 <- sumTab %>% filter(condition == "AE_pt") %>% pull(`mean(pt)`)
+compareValues(reportedValue = 20.5, obtainedValue = m3)
+sd3 <- sumTab %>% filter(condition == "AE_pt") %>% pull(`sd(pt)`)
+compareValues(reportedValue = 134.3, obtainedValue = sd3)
+
+m4 <- sumTab %>% filter(condition == "AEA_pt") %>% pull(`mean(pt)`)
+compareValues(reportedValue = 129.4, obtainedValue = m4)
+sd4 <- sumTab %>% filter(condition == "AEA_pt") %>% pull(`sd(pt)`)
+compareValues(reportedValue = 116.2, obtainedValue = sd4)
+```
+
+> The perceived delay in the tone was larger in the EA condition (p = 0.002) and smaller in the AE condition (p = 0.001) than in the E condition. There was no significant difference between the perceived delay in the AEA condition and that in the E condition (p = 0.683).
+
+This was initially an insufficient information error as the statistical test was not explictly identified. However, the original authors informed us that they had used t-tests here. They noted that paired t-tests should have been employed, but they actually used unpaired t-tests.
+
+```{r}
+p1 <- t.test(df_drop2$EA_pt, df_drop2$E_pt)$p.value
+compareValues(reportedValue = .002, obtainedValue = p1, isP = T)
+p2 <- t.test(df_drop2$AE_pt, df_drop2$E_pt)$p.value
+compareValues(reportedValue = .001, obtainedValue = p2, isP = T)
+p3 <- t.test(df_drop2$AEA_pt, df_drop2$E_pt)$p.value
+compareValues(reportedValue = .683, obtainedValue = p3, isP = T)
+```
+
+All values match. Let's try and reproduce these outcomes:
+
+> A one-way ANOVA revealed a significant effect of conditions (F(2, 36) = 20.62, p < 0.001) on the standardized difference scores (where the difference scores for each participant in the E condition was subtracted from his or her difference score in the EA, AE, and AEA conditions).
+
+```{r}
+diffs <- df_drop2 %>% mutate(EA_diff = EA_pt - E_pt, AE_diff = AE_pt - E_pt, AEA_diff = AEA_pt - E_pt) # calculate difference scores
+
+# tidy dataframe
+df_diffs <- diffs %>% gather(condition, diffScore, EA_diff:AEA_diff, factor_key=TRUE) %>% select(Sbj, condition, diffScore) %>% mutate(Sbj = factor(Sbj))
+
+# calculate repeated measures anova
+aov1 <- aov(diffScore ~ condition + Error(Sbj/condition), data=df_diffs)
+summary(aov1)
+aov1 <- tidy(aov1$`Sbj:condition`)
+aovF <- aov1 %>% filter(term == "condition") %>% pull(statistic)
+compareValues(reportedValue = 20.62, obtainedValue = aovF)
+```
+Values appear to match.
+
+> The post hoc tests revealed that the standardized difference scores were larger (more positive) in the EA condition than in the AE and AEA conditions (p = 0.000 and p = 0.012 respectively). The standardized difference score was smaller (less positive) in the AE condition than in the AEA condition (p = 0.003). In summary, temporal binding occurred both when an action triggered an event and when an event triggered an action. However, the binding (as indicated by a smaller perceived delay) was decreased when an action followed an action – event sequence.
+
+```{r}
+EA_diffs <- df_diffs %>% filter(condition == "EA_diff") %>% pull(diffScore)
+AE_diffs <- df_diffs %>% filter(condition == "AE_diff") %>% pull(diffScore)
+AEA_diffs <- df_diffs %>% filter(condition == "AEA_diff") %>% pull(diffScore)
+
+p5 <- t.test(EA_diffs,AE_diffs, paired = T)$p.value
+# pvalue is reported as "0.000", compare to:
+p5
+
+p6 <- t.test(EA_diffs,AEA_diffs, paired = T)$p.value
+compareValues(reportedValue = 0.012, obtainedValue = p6, isP = T)
+
+p7 <- t.test(AE_diffs,AEA_diffs, paired = T)$p.value
+compareValues(reportedValue = 0.003, obtainedValue = p7, isP = T)
+```
+p value for EA vs AEA and AE vs AEA are reroduced. Reported p-value of 0.000 for EA vs AE must be incorrect but seems reasonable to assume authors mean p < .001 so we will code this as a MINOR NUMERICAL ERROR.
 
 ## Step 5: Conclusion
-
 
 ```{r}
 codReport(Report_Type = 'joint',
           Article_ID = 'Tbkij', 
-          Insufficient_Information_Errors = 1,
+          Insufficient_Information_Errors = 0,
           Decision_Errors = 0, 
           Major_Numerical_Errors = 0, 
-          Minor_Numerical_Errors = 0)
+          Minor_Numerical_Errors = 1,
+          Author_Assistance = T)
 ```
 
-There was insufficient information to continue with the analysis. An outlier was excluded but not explicitly identified, so we do not know which data to exlude from our re-analysis.
+At first there was insufficient information to continue with the analysis: we did not have sufficient information to identify two excluded participants and then two inferential tests were not explicitly identified. This information was shared with us by the original authors, and subsequently we were able to successfully reproduce all target outcomes.
 
 ```{r session_info, include=TRUE, echo=TRUE, results='markup'}
 devtools::session_info()
