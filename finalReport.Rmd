@@ -9,8 +9,11 @@ output:
 #### Article ID: Tbkij
 #### Pilot: Lawrence Liu
 #### Co-pilot: Tom Hardwicke
-#### Start date: 3/23/2017
-#### End date: 05/11/2017
+#### Start date: Mar 23 2017
+#### End date: May 11 2017
+#### Final verification: Tom Hardwicke
+#### Date: Nov 13 2017
+
 
 -------
 
@@ -35,6 +38,9 @@ The dependent variable is average error between the guessed second hand position
 
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
+
+# prepare an empty report object, we will update this each time we run compareValues2()
+reportObject <- data.frame("Article_ID" = NA, "valuesChecked" = 0, "eyeballs" = 0, "Total_df" = 0, "Total_p" = 0, "Total_mean" = 0, "Total_sd" = 0, "Total_se" = 0, "Total_ci" = 0, "Total_bf" = 0, "Total_t" = 0, "Total_F" = 0, "Total_es" = 0, "Total_median" = 0, "Total_irr" = 0, "Total_r" = 0, "Total_z" = 0, "Total_coeff" = 0, "Total_n" = 0, "Total_x2" = 0, "Total_other" = 0, "Insufficient_Information_Errors" = 0, "Decision_Errors" = 0, "Major_Numerical_Errors" = 0, "Minor_Numerical_Errors" = 0, "Major_df" = 0, "Major_p" = 0, "Major_mean" = 0, "Major_sd" = 0, "Major_se" = 0, "Major_ci" = 0, "Major_bf" = 0, "Major_t" = 0, "Major_F" = 0, "Major_es" = 0, "Major_median" = 0, "Major_irr" = 0, "Major_r" = 0, "Major_z" = 0, "Major_coeff" = 0, "Major_n" = 0, "Major_x2" = 0, "Major_other" = 0, "affectsConclusion" = NA, "error_typo" = 0, "error_specification" = 0, "error_analysis" = 0, "error_data" = 0, "error_unidentified" = 0, "Author_Assistance" = NA, "resolved_typo" = 0, "resolved_specification" = 0, "resolved_analysis" = 0, "resolved_data" = 0, "correctionSuggested" = NA, "correctionPublished" = NA)
 ```
 
 ## Step 1: Load packages
@@ -48,7 +54,6 @@ library(haven) # import and export 'SPSS', 'Stata' and 'SAS' Files
 library(readxl) # import excel files
 library(broom) # for neat model output
 library(CODreports) # custom report functions
-pull <- function(x,y) {x[,if(is.name(substitute(y))) deparse(substitute(y)) else y, drop = FALSE][[1]]} # custom function to extract data
 ```
 
 ## Step 2: Load data
@@ -90,8 +95,8 @@ Try to reproduce the following target outcomes:
 > On average, the response time to the tone was 310 ± 67 ms, a value that is consistent with reacting to the tone rather than simply making a ‘double’ movement.
 
 ```{r}
-compareValues(reportedValue = 310, obtainedValue = mean(df$AEA_rt))
-compareValues(reportedValue = 67, obtainedValue = sd(df$AEA_rt))
+reportObject <- compareValues2(reportedValue = "310", obtainedValue = mean(df$AEA_rt), valueType = 'mean')
+reportObject <- compareValues2(reportedValue = "67", obtainedValue = sd(df$AEA_rt), valueType = 'sd')
 ```
 
 ### Inferential statistics
@@ -104,7 +109,10 @@ NB we initially ran into problems here as we did not know the identity of the ou
 
 ```{r}
 df_drop <- df %>% filter(Sbj != "FM016") # remove participant id FM016
-cor.test(df_drop$EA_rt, df_drop$AEA_rt)
+cor.out <- cor.test(df_drop$EA_rt, df_drop$AEA_rt)
+
+reportObject <- compareValues2(reportedValue = "0.54", obtainedValue = cor.out$estimate, valueType = 'r')
+reportObject <- compareValues2(reportedValue = "eyeballMATCH", obtainedValue = cor.out$p.value, valueType = 'p')
 ```
 
 The values match.
@@ -143,24 +151,24 @@ The values appear to match. Let's double check:
 
 ```{r}
 m1 <- sumTab %>% filter(condition == "E_pt") %>% pull(`mean(pt)`)
-compareValues(reportedValue = 141.2, obtainedValue = m1)
+reportObject <- compareValues2(reportedValue = "141.2", obtainedValue = m1, valueType = 'mean')
 sd1 <- sumTab %>% filter(condition == "E_pt") %>% pull(`sd(pt)`)
-compareValues(reportedValue = 45.1, obtainedValue = sd1)
+reportObject <- compareValues2(reportedValue = "45.1", obtainedValue = sd1, valueType = 'sd')
 
 m2 <- sumTab %>% filter(condition == "EA_pt") %>% pull(`mean(pt)`)
-compareValues(reportedValue = 200.5, obtainedValue = m2)
+reportObject <- compareValues2(reportedValue = "200.5", obtainedValue = m2, valueType = 'mean')
 sd2 <- sumTab %>% filter(condition == "EA_pt") %>% pull(`sd(pt)`)
-compareValues(reportedValue = 61.8, obtainedValue = sd2)
+reportObject <- compareValues2(reportedValue = "61.8", obtainedValue = sd2, valueType = 'sd')
 
 m3 <- sumTab %>% filter(condition == "AE_pt") %>% pull(`mean(pt)`)
-compareValues(reportedValue = 20.5, obtainedValue = m3)
+reportObject <- compareValues2(reportedValue = "20.5", obtainedValue = m3, valueType = 'mean')
 sd3 <- sumTab %>% filter(condition == "AE_pt") %>% pull(`sd(pt)`)
-compareValues(reportedValue = 134.3, obtainedValue = sd3)
+reportObject <- compareValues2(reportedValue = "134.3", obtainedValue = sd3, valueType = 'sd')
 
 m4 <- sumTab %>% filter(condition == "AEA_pt") %>% pull(`mean(pt)`)
-compareValues(reportedValue = 129.4, obtainedValue = m4)
+reportObject <- compareValues2(reportedValue = "129.4", obtainedValue = m4, valueType = 'mean')
 sd4 <- sumTab %>% filter(condition == "AEA_pt") %>% pull(`sd(pt)`)
-compareValues(reportedValue = 116.2, obtainedValue = sd4)
+reportObject <- compareValues2(reportedValue = "116.2", obtainedValue = sd4, valueType = 'sd')
 ```
 
 > The perceived delay in the tone was larger in the EA condition (p = 0.002) and smaller in the AE condition (p = 0.001) than in the E condition. There was no significant difference between the perceived delay in the AEA condition and that in the E condition (p = 0.683).
@@ -169,11 +177,11 @@ This was initially an insufficient information error as the statistical test was
 
 ```{r}
 p1 <- t.test(df_drop2$EA_pt, df_drop2$E_pt)$p.value
-compareValues(reportedValue = .002, obtainedValue = p1, isP = T)
+reportObject <- compareValues2(reportedValue = "0.002", obtainedValue = p1, valueType = 'p')
 p2 <- t.test(df_drop2$AE_pt, df_drop2$E_pt)$p.value
-compareValues(reportedValue = .001, obtainedValue = p2, isP = T)
+reportObject <- compareValues2(reportedValue = "0.001", obtainedValue = p2, valueType = 'p')
 p3 <- t.test(df_drop2$AEA_pt, df_drop2$E_pt)$p.value
-compareValues(reportedValue = .683, obtainedValue = p3, isP = T)
+reportObject <- compareValues2(reportedValue = "0.683", obtainedValue = p3, valueType = 'p')
 ```
 
 All values match. Let's try and reproduce these outcomes:
@@ -191,7 +199,14 @@ aov1 <- aov(diffScore ~ condition + Error(Sbj/condition), data=df_diffs)
 summary(aov1)
 aov1 <- tidy(aov1$`Sbj:condition`)
 aovF <- aov1 %>% filter(term == "condition") %>% pull(statistic)
-compareValues(reportedValue = 20.62, obtainedValue = aovF)
+aovDF1 <- aov1 %>% filter(term == "condition") %>% pull(df)
+aovDF2 <- aov1 %>% filter(term == "Residuals") %>% pull(df)
+aovP <- aov1 %>% filter(term == "condition") %>% pull(p.value)
+
+reportObject <- compareValues2(reportedValue = "2", obtainedValue = aovDF1, valueType = 'df')
+reportObject <- compareValues2(reportedValue = "36", obtainedValue = aovDF2, valueType = 'df')
+reportObject <- compareValues2(reportedValue = "20.62", obtainedValue = aovF, valueType = 'F')
+reportObject <- compareValues2(reportedValue = "eyeballMATCH", obtainedValue = aovP, valueType = 'p')
 ```
 Values appear to match.
 
@@ -203,30 +218,72 @@ AE_diffs <- df_diffs %>% filter(condition == "AE_diff") %>% pull(diffScore)
 AEA_diffs <- df_diffs %>% filter(condition == "AEA_diff") %>% pull(diffScore)
 
 p5 <- t.test(EA_diffs,AE_diffs, paired = T)$p.value
-# pvalue is reported as "0.000", compare to:
-p5
+
+reportObject <- compareValues2(reportedValue = "eyeballMATCH", obtainedValue = p5, valueType = 'p')
 
 p6 <- t.test(EA_diffs,AEA_diffs, paired = T)$p.value
-compareValues(reportedValue = 0.012, obtainedValue = p6, isP = T)
+reportObject <- compareValues2(reportedValue = "0.012", obtainedValue = p6, valueType = 'p')
 
 p7 <- t.test(AE_diffs,AEA_diffs, paired = T)$p.value
-compareValues(reportedValue = 0.003, obtainedValue = p7, isP = T)
+reportObject <- compareValues2(reportedValue = "0.003", obtainedValue = p7, valueType = 'p')
 ```
-p value for EA vs AEA and AE vs AEA are reroduced. Reported p-value of 0.000 for EA vs AE must be incorrect but seems reasonable to assume authors mean p < .001 so we will code this as a MINOR NUMERICAL ERROR.
+
+p value for EA vs AEA and AE vs AEA are reroduced. Reported p-value of 0.000 for EA vs AE must be incorrect but seems reasonable to assume authors mean p < .001 so we will code this as a match.
 
 ## Step 5: Conclusion
 
+At first there was insufficient information to continue with the analysis: we did not have sufficient information to identify two excluded participants and then two inferential tests were not explicitly identified. This information was shared with us by the original authors, and subsequently we were able to successfully reproduce all target outcomes.
+
 ```{r}
-codReport(Report_Type = 'joint',
-          Article_ID = 'Tbkij', 
-          Insufficient_Information_Errors = 0,
-          Decision_Errors = 0, 
-          Major_Numerical_Errors = 0, 
-          Minor_Numerical_Errors = 1,
-          Author_Assistance = T)
+reportObject$Article_ID <- "Tbkij"
+reportObject$affectsConclusion <- NA
+reportObject$error_typo <- 0
+reportObject$error_specification <- 0
+reportObject$error_analysis <- 0
+reportObject$error_data <- 0
+reportObject$error_unidentified <- 0
+reportObject$Author_Assistance <- T
+reportObject$resolved_typo <- 0
+reportObject$resolved_specification <- 4
+reportObject$resolved_analysis <- 0
+reportObject$resolved_data <- 0
+reportObject$correctionSuggested <- "no"
+reportObject$correctionPublished <- F
+
+# decide on final outcome
+if(reportObject$Decision_Errors > 0 | reportObject$Major_Numerical_Errors > 0 | reportObject$Insufficient_Information_Errors > 0){
+  reportObject$finalOutcome <- "Failure"
+  if(reportObject$Author_Assistance == T){
+    reportObject$finalOutcome <- "Failure despite author assistance"
+  }
+}else{
+  reportObject$finalOutcome <- "Success"
+  if(reportObject$Author_Assistance == T){
+    reportObject$finalOutcome <- "Success with author assistance"
+  }
+}
+
+# save the report object
+filename <- paste0("reportObject_", reportObject$Article_ID,".csv")
+write_csv(reportObject, filename)
 ```
 
-At first there was insufficient information to continue with the analysis: we did not have sufficient information to identify two excluded participants and then two inferential tests were not explicitly identified. This information was shared with us by the original authors, and subsequently we were able to successfully reproduce all target outcomes.
+## Report Object
+
+```{r, echo = FALSE}
+# display report object in chunks
+kable(reportObject[2:10], align = 'l')
+kable(reportObject[11:20], align = 'l')
+kable(reportObject[21:25], align = 'l')
+kable(reportObject[26:30], align = 'l')
+kable(reportObject[31:35], align = 'l')
+kable(reportObject[36:40], align = 'l')
+kable(reportObject[41:45], align = 'l')
+kable(reportObject[46:51], align = 'l')
+kable(reportObject[52:57], align = 'l')
+```
+
+## Session information
 
 ```{r session_info, include=TRUE, echo=TRUE, results='markup'}
 devtools::session_info()
